@@ -1,0 +1,12 @@
+.wordsearch-selected {
+  background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%) !important;
+  color: #fff !important;
+  border: 2px solid #7c3aed !important;
+  box-shadow: 0 2px 8px 0 rgba(124, 58, 237, 0.18);
+  z-index: 10;
+}
+
+html, body, #root {
+  height: 100%;
+  min-height: 100vh;
+}

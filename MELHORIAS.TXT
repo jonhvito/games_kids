@@ -1,0 +1,37 @@
+
+
+## 4. Extras para Engajamento
+
+- **Sistema de Estrelas ou Medalhas:**  
+  Mostre conquistas ao final de cada jogo (ex: "Você ganhou 3 estrelas!").
+
+- **Ranking Local (Leaderboard):**  
+  Mostre a melhor pontuação do usuário (armazenada em `localStorage`).
+
+- **Personalização:**  
+  Permita que a criança escolha um avatar ou cor de fundo.
+
+- **Modo Escuro:**  
+  Adicione suporte a dark mode para conforto visual.
+
+---
+
+## 5. Acessibilidade
+
+- **Leitura de Tela:**  
+  Adicione `aria-label` e roles nos botões e áreas interativas.
+
+- **Contraste:**  
+  Certifique-se de que o contraste das cores seja suficiente para leitura.
+
+---
+
+
+
+
+
+
+
+
+
+
