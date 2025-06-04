@@ -9,6 +9,7 @@ interface GameSceneProps {
   foundObjects: string[];
   hintedId: string | null;
   onObjectClick: (id: string) => void;
+  roundId: number;
 }
 
 // Emojis dos alimentos por id
@@ -26,12 +27,9 @@ const GameScene: React.FC<GameSceneProps> = ({
   foundObjects,
   hintedId,
   onObjectClick,
+  roundId,
 }) => {
-  // Debug visual opcional:
-  React.useEffect(() => {
-    console.log('GameScene recebeu hintedId:', hintedId);
-  }, [hintedId]);
-
+  
   return (
     <div className="relative w-full h-full overflow-hidden">
       {/* Imagem de Fundo */}
@@ -49,7 +47,7 @@ const GameScene: React.FC<GameSceneProps> = ({
 
         return (
           <motion.button
-            key={obj.id}
+          key={`${roundId}-${obj.id}`}
             onClick={() => !isFound && onObjectClick(obj.id)}
             className={`
               absolute flex items-center justify-center 
@@ -64,8 +62,8 @@ const GameScene: React.FC<GameSceneProps> = ({
               left: `${obj.left}%`,
               top: `${obj.top}%`,
               transform: "translate(-50%, -50%)",
-              width: "var(--object-size, 2.75rem)",
-              height: "var(--object-size, 2.75rem)",
+              width: "var(--object-size, 1.75rem)",
+              height: "var(--object-size, 1.75rem)",
             }}
             aria-label={isFound ? `${obj.name} (encontrado)` : `Encontrar ${obj.name}`}
             disabled={isFound}
@@ -113,6 +111,7 @@ const GameScene: React.FC<GameSceneProps> = ({
             <AnimatePresence>
               {isHinted && (
                 <motion.div
+                  key={`${roundId}-${obj.id}-hint`}
                   className="absolute inset-[-5px] rounded-full border-4 border-yellow-400 dark:border-yellow-500 pointer-events-none shadow-lg"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: [0, 1, 0.8, 1], scale: 1.05 }}

@@ -6,13 +6,17 @@
 
 /* Definição de variáveis CSS Globais */
 :root {
-  --object-size: 2.75rem; /* Tamanho base para os objetos no FindObjectsGame (44px) */
+  --object-size: 1.75rem; /* Tamanho base para os objetos no FindObjectsGame (44px) */
 }
 
 @media (min-width: 640px) { /* breakpoint 'sm' do Tailwind */
   :root {
-    --object-size: 3rem; /* Tamanho maior para objetos em telas sm+ (48px) */
+    --object-size: 1rem; /* Tamanho maior para objetos em telas sm+ (48px) */
   }
+  @media (max-width: 480px) {
+  :root {
+    --object-size: 2.25rem; /* Objetos menores em telas muito pequenas (36px) */
+  }}  
 }
 
 body {

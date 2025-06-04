@@ -97,9 +97,8 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
     if (hintTimeout.current) {
       clearTimeout(hintTimeout.current);
       hintTimeout.current = null;
-      console.log("Timeout de dica limpo no reset");
     }
-    setHintedId(null); 
+    setHintedId(null);
     setHintCount(0);
 
     setFoundObjects([]);
@@ -107,8 +106,8 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
     setShowConfetti(false);
     setRoundId((prev) => prev + 1);
 
-    const offsetAmount = 15; 
-    const objectRadiusPercentEstimate = 3;
+    const offsetAmount = 17;
+    const objectRadiusPercentEstimate = 4;
     const minClampPosition = objectRadiusPercentEstimate;
     const maxClampPosition = 100 - objectRadiusPercentEstimate;
 
@@ -130,7 +129,7 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
 
     setPlayClickSound(false); setTimeout(() => setPlayClickSound(true), 0);
     setPlayCorrectSound(false); setTimeout(() => setPlayCorrectSound(true), 0);
-    
+
     setFoundObjects((prev) => [...prev, id]);
 
     // Se o objeto encontrado era o objeto da dica, limpa a dica imediatamente.
@@ -168,31 +167,42 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
     const randomHintedObject = notFound[Math.floor(Math.random() * notFound.length)];
 
     // Limpa timeout anterior se existir
-    if (hintTimeout.current) { 
+    if (hintTimeout.current) {
       clearTimeout(hintTimeout.current);
       hintTimeout.current = null;
     }
 
     setHintedId(randomHintedObject.id);
     setHintCount((prev) => prev + 1);
+  };
 
-    const thisRound = roundId; // armazena a rodada atual
+  // Sempre que hintedId mudar, inicia um timeout para limpar a dica
+  useEffect(() => {
+    if (!hintedId) return;
+
+    const thisRound = roundId;
 
     hintTimeout.current = setTimeout(() => {
-      // Evita que o timeout da rodada anterior execute na rodada nova
       if (
         roundIdRef.current === thisRound &&
-        !foundObjectsRef.current.includes(randomHintedObject.id)
+        !foundObjectsRef.current.includes(hintedId)
       ) {
         setHintedId(null);
-        hintTimeout.current = null; 
+        hintTimeout.current = null;
       }
     }, 2500);
-  };
+
+    return () => {
+      if (hintTimeout.current) {
+        clearTimeout(hintTimeout.current);
+        hintTimeout.current = null;
+      }
+    };
+  }, [hintedId, roundId]);
 
   // Cleanup global
   useEffect(() => {
-    return () => { 
+    return () => {
       if (hintTimeout.current) {
         clearTimeout(hintTimeout.current);
         hintTimeout.current = null;
@@ -200,11 +210,6 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
       setHintedId(null);
     };
   }, []);
-
-  // Para debug visual
-  useEffect(() => {
-    console.log("hintedId mudou:", hintedId);
-  }, [hintedId]);
 
   if (showInstructions) {
     return <FindObjectsInstructions onStart={startGame} />;
@@ -254,8 +259,9 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
         objects={objects}
         foundObjects={foundObjects}
         hintedId={hintedId}
+        roundId={roundId}
       />
-      
+
       {/* Modal de Jogo Completo */}
       <AnimatePresence>
         {gameComplete && (
@@ -266,19 +272,21 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
       </AnimatePresence>
 
       {/* Cena do Jogo */}
-      <div 
-        className="w-full rounded-lg overflow-hidden shadow-xl 
-                   border-2 border-gray-200 dark:border-slate-700 
-                   bg-sky-100 dark:bg-slate-900  
+      <div
+        className="w-full rounded-lg overflow-hidden shadow-xl
+                   border-2 border-gray-200 dark:border-slate-700
+                   bg-sky-100 dark:bg-slate-900
                    transition-colors duration-300"
         style={currentImageAspectRatio ? { aspectRatio: `${currentImageAspectRatio}` } : { aspectRatio: "16/9" }}
       >
         <GameScene
+          key={roundId}
           backgroundUrl={backgroundUrl}
           objects={objects}
           foundObjects={foundObjects}
           hintedId={hintedId}
           onObjectClick={handleObjectClick}
+          roundId={roundId}
         />
       </div>
 

@@ -39,7 +39,9 @@ const GameLayout: React.FC = () => {
         <h1 className="title-kids mt-4">{getGameTitle()}</h1>
       </div>
       
-      <div className="bg-white rounded-3xl shadow-card p-4 md:p-8 border-4 border-accent">
+      <div
+        className="bg-white dark:bg-slate-800 rounded-3xl shadow-card p-4 md:p-8 border-4 border-accent dark:border-yellow-600 transition-colors duration-300"
+      >
         <Outlet />
       </div>
     </div>

@@ -7,12 +7,14 @@ interface ObjectListProps {
   objects: FoodObject[];
   foundObjects: string[];
   hintedId: string | null;
+  roundId: number; 
 }
 
 const ObjectList: React.FC<ObjectListProps> = ({
   objects,
   foundObjects,
   hintedId,
+  roundId,
 }) => {
   return (
     <div 
@@ -49,8 +51,8 @@ const ObjectList: React.FC<ObjectListProps> = ({
 
         return (
           <motion.div
-            key={obj.id}
-            layout // Anima mudanças de layout se a lista for reordenada/filtrada
+            key={`${roundId}-${obj.id}`} 
+            layout 
             initial={{ opacity: 0, y: 10, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ 
