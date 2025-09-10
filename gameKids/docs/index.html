@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduKids</title>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        min-height: 100vh;
+        margin: 0;
+      }
+      #mascot-loader {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        display: block;
+      }
+      .mascot-bounce {
+        animation: mascot-bounce 1s infinite alternate;
+      }
+      @keyframes mascot-bounce {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-30px); }
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-DYHt7lUz.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Dh8x-dt0.css">
+  </head>
+  <body class="preload-gradient" style="background: linear-gradient(135deg, #FF6F61 0%, #FFD600 50%, #6EC6FF 100%)">
+    <div id="mascot-loader">
+      <svg class="mascot-bounce" width="80" height="80" viewBox="0 0 80 80" fill="none">
+        <circle cx="40" cy="40" r="36" fill="#FFD600" stroke="#FF6F61" stroke-width="6"/>
+        <ellipse cx="30" cy="38" rx="5" ry="8" fill="#fff"/>
+        <ellipse cx="50" cy="38" rx="5" ry="8" fill="#fff"/>
+        <ellipse cx="30" cy="40" rx="2" ry="3" fill="#6EC6FF"/>
+        <ellipse cx="50" cy="40" rx="2" ry="3" fill="#6EC6FF"/>
+        <ellipse cx="40" cy="55" rx="10" ry="5" fill="#FF6F61"/>
+        <ellipse cx="40" cy="53" rx="6" ry="2" fill="#fff" opacity="0.7"/>
+      </svg>
+    </div>
+    <div id="root"></div>
+  </body>
+</html>
