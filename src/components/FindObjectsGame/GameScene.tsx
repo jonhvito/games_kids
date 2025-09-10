@@ -8,7 +8,7 @@ interface GameSceneProps {
   objects: FoodObject[];
   foundObjects: string[];
   hintedId: string | null;
-  onObjectClick: (id: string) => void;
+  onObjectClick: (id: string, event: React.MouseEvent) => void;
   roundId: number;
 }
 
@@ -48,7 +48,7 @@ const GameScene: React.FC<GameSceneProps> = ({
         return (
           <motion.button
           key={`${roundId}-${obj.id}`}
-            onClick={() => !isFound && onObjectClick(obj.id)}
+            onClick={(e) => !isFound && onObjectClick(obj.id, e)}
             className={`
               absolute flex items-center justify-center 
               rounded-full cursor-pointer

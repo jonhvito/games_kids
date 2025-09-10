@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import QRCodeGenerator from "../../components/QRCodeGenerator";
 import SoundEffect from "../../components/SoundEffect";
 import { SOUNDS } from "../../utils/soundUtils";
@@ -124,21 +124,52 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
     setBackgroundUrl(backgroundImages[randomIndex]);
   };
 
-  const handleObjectClick = (id: string) => {
+  const [wrongClick, setWrongClick] = useState<boolean>(false);
+  const [wrongClickPosition, setWrongClickPosition] = useState<{ x: number; y: number } | null>(null);
+  const wrongClickTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Consolidar estados de som em um único objeto
+  const [soundState, setSoundState] = useState({
+    click: false,
+    correct: false,
+    complete: false,
+    wrong: false
+  });
+
+  // Função para tocar sons de forma mais eficiente
+  const playSound = useCallback((soundType: keyof typeof soundState) => {
+    setSoundState(prev => ({ ...prev, [soundType]: true }));
+    setTimeout(() => {
+      setSoundState(prev => ({ ...prev, [soundType]: false }));
+    }, 100);
+  }, []);
+
+  const handleObjectClick = (id: string, event: React.MouseEvent) => {
     if (foundObjects.includes(id) || gameComplete) return;
 
-    setPlayClickSound(false); setTimeout(() => setPlayClickSound(true), 0);
-    setPlayCorrectSound(false); setTimeout(() => setPlayCorrectSound(true), 0);
+    if (objects.some(obj => obj.id === id)) {
+      playSound('correct');
+      setFoundObjects((prev) => [...prev, id]);
 
-    setFoundObjects((prev) => [...prev, id]);
-
-    // Se o objeto encontrado era o objeto da dica, limpa a dica imediatamente.
-    if (id === hintedId) {
-      if (hintTimeout.current) {
-        clearTimeout(hintTimeout.current);
-        hintTimeout.current = null;
+      if (id === hintedId) {
+        if (hintTimeout.current) {
+          clearTimeout(hintTimeout.current);
+          hintTimeout.current = null;
+        }
+        setHintedId(null);
       }
-      setHintedId(null);
+    } else {
+      playSound('wrong');
+      setWrongClick(true);
+      setWrongClickPosition({ x: event.clientX, y: event.clientY });
+      
+      if (wrongClickTimeout.current) {
+        clearTimeout(wrongClickTimeout.current);
+      }
+      wrongClickTimeout.current = setTimeout(() => {
+        setWrongClick(false);
+        setWrongClickPosition(null);
+      }, 500);
     }
   };
 
@@ -207,6 +238,9 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
         clearTimeout(hintTimeout.current);
         hintTimeout.current = null;
       }
+      if (wrongClickTimeout.current) {
+        clearTimeout(wrongClickTimeout.current);
+      }
       setHintedId(null);
     };
   }, []);
@@ -216,13 +250,19 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
   }
 
   return (
-    <div ref={gameContainerRef} className="max-w-5xl mx-auto relative px-2 sm:px-4 py-4 flex flex-col gap-4">
+    <div 
+      ref={gameContainerRef} 
+      className="max-w-5xl mx-auto relative px-2 sm:px-4 py-4 flex flex-col gap-4"
+      role="application"
+      aria-label="Jogo de Encontrar Objetos"
+    >
       {/* Sons */}
       {soundEnabled && (
         <>
-          <SoundEffect src={SOUNDS.CLICK} play={playClickSound} onEnd={() => setPlayClickSound(false)} />
-          <SoundEffect src={SOUNDS.CORRECT} play={playCorrectSound} onEnd={() => setPlayCorrectSound(false)} />
-          <SoundEffect src={SOUNDS.GAME_COMPLETE} play={playCompleteSound} onEnd={() => setPlayCompleteSound(false)} />
+          <SoundEffect src={SOUNDS.CLICK} play={soundState.click} onEnd={() => setSoundState(prev => ({ ...prev, click: false }))} />
+          <SoundEffect src={SOUNDS.CORRECT} play={soundState.correct} onEnd={() => setSoundState(prev => ({ ...prev, correct: false }))} />
+          <SoundEffect src={SOUNDS.GAME_COMPLETE} play={soundState.complete} onEnd={() => setSoundState(prev => ({ ...prev, complete: false }))} />
+          <SoundEffect src={SOUNDS.WRONG} play={soundState.wrong} onEnd={() => setSoundState(prev => ({ ...prev, wrong: false }))} />
         </>
       )}
       {/* Confetti */}
@@ -271,6 +311,25 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
         )}
       </AnimatePresence>
 
+      {/* Feedback de clique errado */}
+      <AnimatePresence>
+        {wrongClick && wrongClickPosition && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="fixed pointer-events-none z-[100]"
+            style={{
+              left: wrongClickPosition.x,
+              top: wrongClickPosition.y,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            <span className="text-4xl">❌</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Cena do Jogo */}
       <div
         className="w-full rounded-lg overflow-hidden shadow-xl
@@ -278,6 +337,8 @@ const FindObjectsGame: React.FC<FindObjectsGameProps> = ({ soundEnabled }) => {
                    bg-sky-100 dark:bg-slate-900
                    transition-colors duration-300"
         style={currentImageAspectRatio ? { aspectRatio: `${currentImageAspectRatio}` } : { aspectRatio: "16/9" }}
+        role="img"
+        aria-label="Cena do jogo com objetos escondidos"
       >
         <GameScene
           key={roundId}

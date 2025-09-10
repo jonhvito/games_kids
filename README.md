@@ -134,6 +134,32 @@ gameKids/
 - [Framer Motion](https://www.framer.com/motion/) (animações)
 - [React Confetti](https://www.npmjs.com/package/react-confetti) (efeitos visuais)
 
-## 📄 Licença
+## � Deploy no GitHub Pages
+
+Para publicar a aplicação no GitHub Pages:
+
+1. Certifique-se de que o repositório está no GitHub (ex: `https://github.com/jonhvito/games_kids`).
+
+2. Execute o build para produção:
+   ```bash
+   npm run build
+   ```
+
+3. Faça commit e push dos arquivos, incluindo a pasta `docs/`:
+   ```bash
+   git add .
+   git commit -m "Build para GitHub Pages"
+   git push origin main
+   ```
+
+4. No repositório GitHub:
+   - Vá para **Settings** > **Pages**.
+   - Em **Source**, selecione **Deploy from a branch**.
+   - Escolha o branch **main** e a pasta **/docs**.
+   - Clique em **Save**.
+
+5. A aplicação estará disponível em `https://jonhvito.github.io/games_kids/`.
+
+## �📄 Licença
 
 Este projeto está licenciado sob a licença MIT.
