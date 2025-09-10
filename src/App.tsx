@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 // Sugestão: Adicionar ícone para o botão de Ranking para consistência
 import { Volume2, VolumeX, Award, X } from 'lucide-react';
 
@@ -78,7 +78,7 @@ function App() {
   }, []); // Array de dependências vazio garante execução única
 
   return (
-    <Router>
+  <Router>
       {/* Sugestão: Aplicar a cor de fundo diretamente no div principal do app também,
         para consistência e para que transições de cor funcionem nele.
         A cor do `body` já é tratada no `useEffect` acima.
