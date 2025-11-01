@@ -1,11 +1,11 @@
 // Sound file paths
 export const SOUNDS = {
-  CORRECT: '/sounds/correct.mp3',
-  INCORRECT: '/sounds/incorrect.mp3',
-  GAME_COMPLETE: '/sounds/game-complete.mp3',
-  CLICK: '/sounds/click.mp3',
-  BACKGROUND: '/sounds/background.mp3',
-  WRONG: '/sounds/wrong.mp3'
+  CORRECT: './sounds/correct.mp3',
+  INCORRECT: './sounds/incorrect.mp3',
+  GAME_COMPLETE: './sounds/complete.mp3',
+  CLICK: './sounds/click.mp3',
+  BACKGROUND: './sounds/background.mp3',
+  WRONG: './sounds/incorrect.mp3'
 } as const;
 
 // Create placeholder audio files to ensure the paths exist

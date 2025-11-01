@@ -4,10 +4,10 @@ import WordSearchInstructions from "./WordSearchInstructions";
 import { generateWordSearch, Word } from "./wordSearchUtils";
 import WordSearchGrid from "./WordSearchGrid";
 import WordList from "./WordList";
-import Header from "../../components/WordSearchGame/Header";
-import CompleteModal from "../../components/WordSearchGame/GameComplete";
+import Header from "./Header";
+import CompleteModal from "../../components/GameComplete";
 import Confetti from "react-confetti";
-import GameSounds from "../../components/WordSearchGame/GameSounds";
+import GameSounds from "./GameSounds";
 
 interface WordSearchGameProps {
   soundEnabled: boolean;
@@ -253,9 +253,10 @@ const WordSearchGame: React.FC<WordSearchGameProps> = ({ soundEnabled }) => {
       {/* Complete Modal */}
       {gameComplete && (
         <CompleteModal
+          gameType="word-search"
           onReset={resetGame}
-          foundWords={foundWords.length}
-          totalWords={words.length}
+          foundItems={foundWords.length}
+          totalItems={words.length}
         />
       )}
 

@@ -10,5 +10,6 @@ export default defineConfig({
   build: {
     outDir: 'docs',
   },
-  base: '/games_kids/',
+  base: './',
 });
+#comentario de teste

@@ -7,7 +7,7 @@ interface MascotProps {
 }
 
 const Mascot: React.FC<MascotProps> = ({ size = 80, className = "", bounce = false }) => (
-  <span className={`mascot-kids ${bounce ? "mascot-bounce" : ""} ${className}`}>
+  <span className={`mascot-kids ${bounce ? "mascot-bounce animate-float" : ""} ${className}`}>
     <svg
       width={size}
       height={size}

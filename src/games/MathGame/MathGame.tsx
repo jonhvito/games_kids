@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import QRCodeGenerator from "../../components/QRCodeGenerator";
 import { generateQuestion, checkAnswer, QuestionType } from "./mathGameUtils";
 import MathGameInstructions from "./MathGameInstructions";
-import CelebrationEffect from "../../components/MathGame/CelebrationEffect";
-import AnswerOptions from "../../components/MathGame/AnswerOptions";
-import GameComplete from "../../components/MathGame/GameComplete";
-import GameSounds from "../../components/MathGame/GameSounds";
-import Header from "../../components/MathGame/Header";
-import QuestionDisplay from "../../components/MathGame/QuestionDisplay";
+import CelebrationEffect from "../../components/CelebrationEffect";
+import AnswerOptions from "./AnswerOptions";
+import GameComplete from "../../components/GameComplete";
+import GameSounds from "./GameSounds";
+import Header from "./Header";
+import QuestionDisplay from "./QuestionDisplay";
 
 interface MathGameProps {
   soundEnabled: boolean;
@@ -54,8 +54,8 @@ const MathGame: React.FC<MathGameProps> = ({ soundEnabled }) => {
   const handleAnswerSelect = (answer: number) => {
     if (selectedAnswer !== null) return;
 
-    setPlayClickSound(false);
-    setTimeout(() => setPlayClickSound(true), 0);
+    setPlayClickSound(true);
+    setTimeout(() => setPlayClickSound(false), 100);
 
     setSelectedAnswer(answer);
     const correct = checkAnswer(question, answer);
@@ -64,18 +64,22 @@ const MathGame: React.FC<MathGameProps> = ({ soundEnabled }) => {
     setTimeout(() => {
       if (correct) {
         setScore((prev) => prev + 10);
-        setPlayCorrectSound(false);
-        setTimeout(() => setPlayCorrectSound(true), 0);
+        if (soundEnabled) {
+          setPlayCorrectSound(true);
+          setTimeout(() => setPlayCorrectSound(false), 100);
+        }
       } else {
-        setPlayIncorrectSound(false);
-        setTimeout(() => setPlayIncorrectSound(true), 0);
+        if (soundEnabled) {
+          setPlayIncorrectSound(true);
+          setTimeout(() => setPlayIncorrectSound(false), 100);
+        }
       }
       setQuestionsAnswered((prev) => prev + 1);
 
       setTimeout(() => {
         generateNewQuestion();
-      }, 1200);
-    }, 200);
+      }, 1500);
+    }, 300);
   };
 
   useEffect(() => {
@@ -90,7 +94,7 @@ const MathGame: React.FC<MathGameProps> = ({ soundEnabled }) => {
         localStorage.setItem(HIGH_SCORE_KEY, String(score));
       }
     }
-  }, [questionsAnswered]);
+  }, [questionsAnswered, score, highScore]);
 
   const resetGame = () => {
     setPlayClickSound(false);
@@ -113,7 +117,6 @@ const MathGame: React.FC<MathGameProps> = ({ soundEnabled }) => {
     <div className="max-w-3xl mx-auto relative font-baloo px-2 sm:px-4 py-4">
       {/* Sons */}
       <GameSounds
-        soundEnabled={soundEnabled}
         playClick={playClickSound}
         playCorrect={playCorrectSound}
         playIncorrect={playIncorrectSound}
@@ -131,7 +134,8 @@ const MathGame: React.FC<MathGameProps> = ({ soundEnabled }) => {
       <Header
         score={score}
         questionsAnswered={questionsAnswered}
-        onReset={resetGame}
+        totalQuestions={10}
+        highScore={highScore}
       />
 
       {/* Exibe o recorde/local leaderboard */}
@@ -143,7 +147,7 @@ const MathGame: React.FC<MathGameProps> = ({ soundEnabled }) => {
 
       {/* Game Complete */}
       {questionsAnswered === 10 ? (
-        <GameComplete score={score} onReset={resetGame} />
+        <GameComplete gameType="math" score={score} onReset={resetGame} />
       ) : (
         question && (
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-8 rounded-2xl shadow-xl mb-8 animate-slide-in min-h-[18rem] flex flex-col gap-4 sm:gap-8">
@@ -151,10 +155,10 @@ const MathGame: React.FC<MathGameProps> = ({ soundEnabled }) => {
 
             <AnswerOptions
               options={options}
+              onAnswer={handleAnswerSelect}
+              disabled={!!selectedAnswer}
               selectedAnswer={selectedAnswer}
-              isCorrect={isCorrect}
-              question={question}
-              onSelect={handleAnswerSelect}
+              correctAnswer={question?.result}
             />
           </div>
         )

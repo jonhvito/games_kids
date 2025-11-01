@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-// Sugestão: Adicionar ícone para o botão de Ranking para consistência
-import { Volume2, VolumeX, Award, X } from 'lucide-react';
+import { Volume2, VolumeX, Award, X, Music } from 'lucide-react';
 
 // Components
 import Navbar from './components/Navbar';
@@ -10,7 +9,9 @@ import SoundEffect from './components/SoundEffect';
 import MusicConsentModal from './components/MusicConsentModal';
 import AvatarSelector from './components/AvatarSelector';
 import BackgroundColorSelector from './components/BackgroundColorSelector';
+import ThemeIntensitySelector from './components/ThemeIntensitySelector';
 import Leaderboard from './components/Leaderboard';
+import ThemeProvider from './components/ThemeProvider';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -26,18 +27,22 @@ import { SOUNDS } from './utils/soundUtils';
 
 function App() {
   const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
+  const [musicEnabled, setMusicEnabled] = useState<boolean>(false);
   const [showMusicModal, setShowMusicModal] = useState<boolean>(true);
   const [showPersonalize, setShowPersonalize] = useState(false);
   const [avatar, setAvatar] = useState<string>(() => localStorage.getItem('selectedAvatar') || '🦁');
   const [bgColor, setBgColor] = useState<string>(() => localStorage.getItem('selectedBgColor') || '#e3f2fd');
+  const [themeIntensity, setThemeIntensity] = useState<string>(() => localStorage.getItem('currentThemeIntensity') || 'Normal');
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     const stored = localStorage.getItem('darkMode');
     return stored ? stored === 'true' : false;
   });
 
   const toggleSound = () => setSoundEnabled((prev) => !prev);
+  const toggleMusic = () => setMusicEnabled((prev) => !prev);
   const handleAcceptMusic = () => {
     setSoundEnabled(true);
+    setMusicEnabled(true);
     setShowMusicModal(false);
   };
   const toggleDarkMode = () => {
@@ -48,148 +53,184 @@ function App() {
     });
   };
 
-  // Efeito para aplicar dark mode e cor de fundo no body
+  // Efeito para aplicar as variações de dark mode e cor personalizada no body
   useEffect(() => {
     const root = document.documentElement;
     const body = document.body;
+
     if (darkMode) {
       root.classList.add('dark');
-      body.style.background = '#22223b'; // Cor de fundo do body no dark mode
+      body.style.background = '#22223b';
     } else {
       root.classList.remove('dark');
-      body.style.background = bgColor; // Cor de fundo do body no light mode
+      body.style.background = bgColor;
     }
   }, [darkMode, bgColor]);
 
   const handleAvatarSelect = (a: string) => {
     setAvatar(a);
-    localStorage.setItem('selectedAvatar', a); // Persistir avatar
+    localStorage.setItem('selectedAvatar', a);
   };
   const handleBgColorSelect = (c: string) => {
     setBgColor(c);
-    localStorage.setItem('selectedBgColor', c); // Persistir cor de fundo
+    localStorage.setItem('selectedBgColor', c);
+  };
+  const handleThemeIntensityChange = (gradient: string, intensity: string) => {
+    document.documentElement.style.setProperty('--game-bg-gradient', gradient);
+    setThemeIntensity(intensity);
+    localStorage.setItem('currentThemeIntensity', intensity);
   };
 
-  // Efeito para remover mascote de preload (executa apenas uma vez na montagem)
   useEffect(() => {
-    const mascot = document.getElementById('mascot-loader');
-    if (mascot) mascot.style.display = 'none';
-    document.body.classList.remove('preload-gradient');
-  }, []); // Array de dependências vazio garante execução única
+    const removeMascot = () => {
+      const mascot = document.getElementById('mascot-loader');
+      if (mascot) {
+        mascot.remove();
+      }
+    };
+    removeMascot();
+  }, []);
+
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   return (
-  <Router>
-      {/* Sugestão: Aplicar a cor de fundo diretamente no div principal do app também,
-        para consistência e para que transições de cor funcionem nele.
-        A cor do `body` já é tratada no `useEffect` acima.
-      */}
-      <div 
-        className={`min-h-screen flex flex-col transition-colors duration-300 ${darkMode ? 'bg-gray-900 text-gray-100' : 'text-gray-800'}`}
-        style={!darkMode ? { backgroundColor: bgColor } : {}}
-      >
-        {showMusicModal && (
-          <MusicConsentModal
-            onAccept={handleAcceptMusic}
+    <Router>
+      <ThemeProvider darkMode={darkMode}>
+        <div 
+          className={`min-h-screen flex flex-col transition-all duration-700 ease-out ${
+            darkMode ? 'bg-gray-900 text-gray-100' : 'text-gray-800'
+          } bg-gradient-to-br`}
+          style={!darkMode ? { backgroundColor: bgColor } : {}}
+        >
+          {showMusicModal && (
+            <MusicConsentModal
+              onAccept={handleAcceptMusic}
+            />
+          )}
+
+          <SoundEffect 
+            src={SOUNDS.BACKGROUND}
+            play={musicEnabled && !showMusicModal}
+            loop={true}
+            volume={0.1}
           />
-        )}
 
-        <SoundEffect 
-          src={SOUNDS.BACKGROUND}
-          play={soundEnabled && !showMusicModal}
-          loop={true}
-          volume={0.1}
-        />
+          <Navbar
+            avatar={avatar}
+            onPersonalize={() => setShowPersonalize(!showPersonalize)}
+            darkMode={darkMode}
+            onToggleDarkMode={toggleDarkMode}
+          />
 
-        <Navbar
-          avatar={avatar}
-          onPersonalize={() => setShowPersonalize((v) => !v)}
-          darkMode={darkMode}
-          onToggleDarkMode={toggleDarkMode}
-        />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/games" element={<GameLayout />}>
+                <Route path="math" element={<MathGame soundEnabled={soundEnabled} />} />
+                <Route path="find-objects" element={<FindObjectsGame soundEnabled={soundEnabled} />} />
+                <Route path="word-search" element={<WordSearchGame soundEnabled={soundEnabled} />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
 
-        {/* Modal de Personalização com animação sutil */}
-        {showPersonalize && (
-          <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-300 ease-out"
-            // Adicionar `data-state` para controlar animação de entrada/saída se usar bibliotecas como Radix ou Headless UI
-            // ou implementar com classes condicionais para animações de entrada/saída.
-            // Exemplo simples com delay para permitir renderização antes da transição:
-            // initial={{ opacity: 0, scale: 0.95 }}
-            // animate={{ opacity: 1, scale: 1 }}
-            // exit={{ opacity: 0, scale: 0.95 }}
-            // Para uma solução puramente Tailwind, você pode usar `useEffect` para adicionar/remover classes de animação.
-          >
-            <div
-              className={`
-                bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-xl border-2 border-accent
-                w-11/12 max-w-sm sm:max-w-md relative
-                flex flex-col gap-5
-                overflow-y-auto
-                max-h-[85vh]
-                transition-all duration-300 ease-out
-                ${showPersonalize ? 'opacity-100 scale-100' : 'opacity-0 scale-95'} // Animação simples de entrada
-              `}
-              style={{ boxSizing: "border-box" }}
-              // onClick={(e) => e.stopPropagation()} // Para evitar fechar ao clicar dentro do modal, se o overlay fechar ao clicar
-            >
-              <button
-                className="absolute top-3 right-3 text-gray-500 hover:text-primary-dark dark:text-gray-400 dark:hover:text-white transition-colors p-1 rounded-full"
-                onClick={() => setShowPersonalize(false)}
-                aria-label="Fechar personalização"
-              >
-                <X size={24} /> {/* Ícone para fechar */}
-              </button>
-              <h2 className="text-xl sm:text-2xl font-semibold text-center text-primary dark:text-accent-light mb-2">Personalizar</h2>
-              <AvatarSelector onSelect={handleAvatarSelect} currentAvatar={avatar} />
-              {/* Sugestão: Usar uma linha divisória estilizada ou apenas mais espaço */}
-              <hr className="border-gray-200 dark:border-gray-700 my-3 sm:my-4" />
-              <BackgroundColorSelector onSelect={handleBgColorSelect} currentBgColor={bgColor} />
+          <Footer />
+
+          {showPersonalize && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className={`${
+                darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-800'
+              } p-6 rounded-lg shadow-lg max-w-md w-full mx-4 transition-colors duration-300`}>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold">Personalizar</h2>
+                  <button
+                    onClick={() => setShowPersonalize(false)}
+                    className={`p-2 rounded-full ${
+                      darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                <div className="space-y-6">
+                  <AvatarSelector onSelect={handleAvatarSelect} />
+                  <BackgroundColorSelector onSelect={handleBgColorSelect} />
+                  <ThemeIntensitySelector 
+                    onIntensityChange={handleThemeIntensityChange}
+                    currentIntensity={themeIntensity}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        )}
-        
-        <main className="flex-grow w-full max-w-full overflow-x-hidden pt-24 sm:pt-28 px-4">
-          <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-3 items-end">
-            {/* Botão de Som com melhor feedback visual no hover */}
+          )}
+
+          {showLeaderboard && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className={`${
+                darkMode ? 'bg-slate-800 text-white' : 'bg-white text-gray-800'
+              } rounded-lg shadow-lg max-w-md w-full mx-4 transition-colors duration-300`}>
+                <div className="flex justify-between items-center p-6 pb-4">
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    <Award className="text-yellow-500" size={24} />
+                    Ranking
+                  </h2>
+                  <button
+                    onClick={() => setShowLeaderboard(false)}
+                    className={`p-2 rounded-full ${
+                      darkMode ? 'hover:bg-slate-700' : 'hover:bg-gray-100'
+                    }`}
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                <div className="px-6 pb-6">
+                  <Leaderboard />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-40">
             <button
-              onClick={toggleSound}
-              className="p-3 bg-white dark:bg-gray-700 dark:text-gray-200 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 ease-out"
-              aria-label={soundEnabled ? "Desativar som" : "Ativar som"}
-            >
-              {soundEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
-            </button>
-            
-            {/* Botão de Ranking com ícone e scroll aprimorado */}
-            <button
-              onClick={() => {
-                const leaderboardElement = document.getElementById('leaderboard');
-                leaderboardElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }}
-              // Sugestão: Usar cor de acento ou primária para o botão de ranking
-              className="p-3 bg-accent hover:bg-accent-dark text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 ease-out"
-              aria-label="Ver ranking local"
+              onClick={() => setShowLeaderboard(!showLeaderboard)}
+              className={`p-3 rounded-full shadow-lg ${
+                darkMode ? 'bg-slate-700 hover:bg-slate-600 text-yellow-400' : 'bg-white hover:bg-gray-50 text-yellow-600'
+              } transition-colors duration-200`}
+              aria-label="Ver ranking"
             >
               <Award size={24} />
             </button>
-          </div>
 
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/games" element={<GameLayout />}>
-              <Route path="math" element={<MathGame soundEnabled={soundEnabled} />} />
-              <Route path="find-objects" element={<FindObjectsGame soundEnabled={soundEnabled} />} />
-              <Route path="word-search" element={<WordSearchGame soundEnabled={soundEnabled} />} />
-              <Route path="" element={<Navigate to="/" replace />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+            <button
+              onClick={toggleSound}
+              className={`p-3 rounded-full shadow-lg ${
+                darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-white hover:bg-gray-50'
+              } transition-colors duration-200`}
+              aria-label={soundEnabled ? 'Desativar som' : 'Ativar som'}
+            >
+              {soundEnabled ? (
+                <Volume2 size={24} className="text-green-500" />
+              ) : (
+                <VolumeX size={24} className="text-red-500" />
+              )}
+            </button>
 
-          <div id="leaderboard" className="max-w-2xl mx-auto my-16 py-8"> {/* Aumentar margem e padding se necessário */}
-            <Leaderboard />
+            <button
+              onClick={toggleMusic}
+              className={`p-3 rounded-full shadow-lg ${
+                darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-white hover:bg-gray-50'
+              } transition-colors duration-200`}
+              aria-label={musicEnabled ? 'Desativar música' : 'Ativar música'}
+            >
+              <Music 
+                size={24} 
+                className={musicEnabled ? 'text-blue-500' : 'text-gray-400'} 
+              />
+            </button>
           </div>
-        </main>
-        <Footer />
-      </div>
+        </div>
+      </ThemeProvider>
     </Router>
   );
 }

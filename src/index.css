@@ -6,7 +6,12 @@
 
 /* Definição de variáveis CSS Globais */
 :root {
-  --object-size: 1.75rem; 
+  --object-size: 1.75rem;
+  /* Variáveis de tema dinâmico */
+  --theme-primary: #3B82F6;
+  --theme-secondary: #8B5CF6;
+  --theme-accent: #F59E0B;
+  --theme-bg-gradient: from-blue-50 to-violet-50;
 }
 
 @media (min-width: 640px) { 
@@ -17,6 +22,84 @@
   :root {
     --object-size: 2.25rem; 
   }}  
+}
+
+/* Animações customizadas */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  25% { transform: translateY(-10px) rotate(1deg); }
+  50% { transform: translateY(-5px) rotate(0deg); }
+  75% { transform: translateY(-15px) rotate(-1deg); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+@keyframes gradientMove {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-out;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradientMove 4s ease infinite;
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+/* Classes dinâmicas de tema */
+.theme-primary {
+  color: var(--theme-primary);
+}
+
+.theme-bg-primary {
+  background-color: var(--theme-primary);
+}
+
+.theme-border-primary {
+  border-color: var(--theme-primary);
+}
+
+.theme-shadow-primary {
+  box-shadow: 0 10px 25px -5px var(--theme-primary);
+}
+
+.theme-gradient-bg {
+  background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+}
+
+/* Efeitos de intensidade para cards */
+.card-kids.theme-enhanced {
+  border-color: var(--theme-primary);
+  box-shadow: 0 10px 25px -3px var(--theme-accent);
+}
+
+.card-kids.theme-enhanced:hover {
+  box-shadow: 0 20px 35px -5px var(--theme-primary);
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Botões com tema */
+.btn-kids.theme-enhanced {
+  background: linear-gradient(135deg, var(--theme-primary), var(--theme-accent));
+  box-shadow: 0 4px 15px var(--theme-accent);
 }
 
 body {
